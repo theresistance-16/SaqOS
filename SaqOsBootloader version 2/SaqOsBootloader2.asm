@@ -87,7 +87,7 @@ handle_enter:
 
 handle_backspc:
     mov ax, buffer
-    cmp ax, bx ;compare ax with bx
+    cmp bx, ax ;compare ax with bx
     jle saqshell ;if bx is same or less than ax, the user is trying to delete my cursor!
     mov ah, 0x0E ;switch to tty quickly
     mov al, 0x08 
