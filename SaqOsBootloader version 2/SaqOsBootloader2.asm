@@ -65,7 +65,7 @@ saqshell:
     cmp al, 0x08 ;check if user pressed backspace
     je handle_backspc
     cmp al, 0x1B ;check if user pressed escape
-    je escape
+    je spaces
 
     jmp move_letter_to_screen ;else we jump to moving the letters inside al to screen and inc bx for next letter
 
@@ -102,21 +102,26 @@ handle_backspc:
     jmp saqshell
 
 
+spaces:
+    mov ah, 0x0E
 
+    mov al, 0x0D
+    int 0x10
+
+    mov al, 0x0A
+    int 0x10
+
+    mov al, 0x0D
+    int 0x10
+
+    mov al, 0x0A
+    int 0x10
+
+    jmp escape
 
 escape:
-    mov ah, 0x0E
-    mov al, 0x0D
-    int 0x10
 
-    mov al, 0x0A
-    int 0x10
 
-    mov al, 0x0D
-    int 0x10
-    
-    mov al, 0x0A
-    int 0x10
 
     mov al, [bp]
     int 0x10
