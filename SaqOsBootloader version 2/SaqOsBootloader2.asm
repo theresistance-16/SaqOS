@@ -3,9 +3,10 @@ org 0x7c00
 
 setup:
     cli
-    xor cx, cx
+    xor ax, ax
+    xor bp, bp
     xor bx, bx
-    xor dx, dx
+    xor si, si
     xor ah, ah
     xor al, al
     mov ds, bx
@@ -15,8 +16,8 @@ setup:
     sti ;register init
 
     mov bx, buffer ;we move our input buffer in bx
-    mov dx, msg ;our welcome msg goes into dx
-    mov cx, exitmsg ;our exitmsg goes into cx
+    mov si, msg ;our welcome msg goes into si
+    mov bp, exitmsg ;our exitmsg goes into bp
     jmp start_tty
 
 
@@ -26,14 +27,14 @@ start_tty:
 
 print_welcome:
     
-    mov al, [dx] ;mov the contents of dx inside al so int 0x10 prints to screen
+    mov al, [si] ;mov the contents of si inside al so int 0x10 prints to screen
     int 0x10 ;first byte on screen
 
     cmp al, 0 ;check if al reached null
 
     je saqshellsetup ;we jump to saqshellsetup because we need to drop down two lines and enable waiting for a keyboard press
 
-    inc dx ;inc dx so next byte goes into al
+    inc si ;inc dx so next byte goes into al
 
     jmp print_welcome
 
@@ -85,6 +86,9 @@ handle_enter:
     jmp saqshell
 
 handle_backspc:
+    mov ax, buffer
+    cmp ax, bx ;compare ax with bx
+    jle saqshell ;if bx is same or less than ax, the user is trying to delete my cursor!
     mov ah, 0x0E ;switch to tty quickly
     mov al, 0x08 
     int 0x10 ;move cursor one left
@@ -96,6 +100,9 @@ handle_backspc:
     dec bx ;go one back
     mov byte [bx], 0 ;good we overwritten the misstyped byte with 0 
     jmp saqshell
+
+
+
 
 escape:
     mov ah, 0x0E
@@ -111,13 +118,13 @@ escape:
     mov al, 0x0A
     int 0x10
 
-    mov al, [cx]
+    mov al, [bp]
     int 0x10
 
     cmp al, 0
     je halt_cpu
 
-    inc cx
+    inc bp ;holy, i forgot to inc bp but incremented cx instead, the cpu went nuts
 
     jmp escape
 
@@ -126,12 +133,18 @@ halt_cpu:
     hlt
     
 
-
+move_letter_to_screen:
+    ;i fully forgot about this label lol
+    mov ah, 0x0E ;set tty mode again
+    mov [bx], al ;move the byte inside al to bx
+    int 0x10 ;send the byte to screen
+    inc bx ;inc bx so the next byte has the space
+    jmp saqshell
 ;data section
 
-buffer: times 128 db 0
+buffer: times 60 db 0
 
-msg db "Welcome to SaqOs Bootloader! Initialized registers: bx, dx, ah, al, ds, ss, es, sp. press esc to hlt cpu", 0
+msg db "Welcome to SaqOs Bootloader! Initialized registers: bx, dx, ah, al, ds, ss, es, sp, ax (lol i made some mistakes in the code and nope, theyre not all the registers). press esc to hlt cpu", 0
 
 exitmsg db "See you soon! Halting Cpu...", 0
 
