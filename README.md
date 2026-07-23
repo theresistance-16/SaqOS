@@ -1,2 +1,2 @@
 This Repository Contains SaqOs source code. Version 1 and 2 of SaqOS is just the bootloader, no kernel no nothing. all of this is written in 16 bit assembly
-i might rewrite everything in 32 bit assembly and make the bootloader switch from 16 to 32 bit. If you know my from my old account (@theresistance-12) you mightve seen saqos written in c, but here i will write it in assembly instead, much easier to manage registers
+i might rewrite everything in 32 bit assembly and make the bootloader switch from 16 to 32 bit. If you know me from my old account (@theresistance-12) you mightve seen saqos written in c, but here i will write it in assembly instead, much easier to manage registers
