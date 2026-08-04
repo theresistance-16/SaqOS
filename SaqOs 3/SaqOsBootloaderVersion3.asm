@@ -3,6 +3,8 @@ org 0x7c00
 
 ;register  and msg setup
 registers:
+    mov [boot_drive], dl
+
     cli
     xor ax, ax
     xor al, al
@@ -165,8 +167,35 @@ boot_to_kernel:
 
     int 0x13 ;bios now copies the sector that the kernel is in to ram at address 0x1000:0x0000
 
+    jc disk_error_print_stp
+    test ah, ah
+    jnz disk_error_print_stp
+
+
     JMP 0x1000:0x0000 ;that goes to our kernel that loaded in ram
 
+disk_error_print_stp:
+    mov si, boot_err_msg
+    mov ah, 0x0E
+
+    mov al, 0x0D
+    int 0x10
+
+    mov al, 0x0A
+    int 0x10
+
+    jmp print_booterror
+
+print_booterror:
+    mov al, [si]
+    cmp al, 0
+    je halt
+
+    int 0x10
+
+    inc si
+
+    jmp print_booterror
 
 wrong_anwser_setup:
     mov ah, 0x0E ;do we make a new line??? 
@@ -233,11 +262,13 @@ halt:
     hlt
 
 
-msg_for_n db "Its safe to poweroff your pc now!", 0
+msg_for_n db "Its safe to poweroff your pc", 0
 boot_msg db "Booting SaqKernel...", 0
-wrong db "Please Type either y to boot into saqos or n to halt cpu!", 0
-welcome db "Welcome to SaqOs Bootloader Version 3!", 0
-ask_for_y db "Do you want to boot into SaqOs? Y/n> ", 0
+wrong db "Please Type Y/n", 0
+welcome db "Welcome to SaqOs Bootloader!", 0
+ask_for_y db "Boot into SaqOs? Y/n> ", 0
+boot_err_msg db "DISK ERR!, hlting...", 0
+boot_drive db 0
 
 times 510 - ($ - $$) db 0
 db 0x55
