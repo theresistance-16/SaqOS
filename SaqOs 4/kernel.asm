@@ -408,7 +408,7 @@ halt:
 
 
 ;hardcoded commands/prompt here:
-cmd: db "SaqKernel> ", 0
+cmd: db "SaqKernel>", 0
 panic: db "panic", 0 
 help: db "help", 0
 exit: db "exit", 0
